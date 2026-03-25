@@ -1,5 +1,5 @@
 #--------Libraries------------
-install.packages(c("tidyverse", "plm", "fixest", "car", "stargazer"))
+# install.packages(c("tidyverse", "plm", "fixest", "car", "stargazer"))
 library(tidyverse)
 library(plm)
 library(fixest)
@@ -9,7 +9,7 @@ library(stargazer)
 #--------Step 0: Load & Inspect Raw Data------------
 
 setwd("/Users/giovannibrenni/Desktop/FS26/Research Seminar/Master")
-df_raw <- read_csv("MASTER_EU27_CH_OECD_20260325.csv")
+df_raw <- read_csv("Dataset & Code - 20260325/MASTER_EU27_CH_OECD_20260325.csv")
 
 # Inspect structure
 glimpse(df_raw)
@@ -689,3 +689,1092 @@ p4_market <- country_year %>%
 
 ggplotly(p4_market, tooltip = c("colour", "x", "y")) %>%
   layout(width = 1200, height = 800)
+
+
+#--------Step 7: Split-Sample Regressions by Financial System Type------------
+# Bank-based (FinStructure < 0) vs Market-based (FinStructure >= 0)
+
+df_bank_based   <- df_clean %>% filter(!is.na(FinStructure), FinStructure < 0)
+df_market_based <- df_clean %>% filter(!is.na(FinStructure), FinStructure >= 0)
+
+cat("Bank-based:   ", nrow(df_bank_based),   "obs,",
+    n_distinct(df_bank_based$Country),   "countries\n")
+cat("Market-based: ", nrow(df_market_based), "obs,",
+    n_distinct(df_market_based$Country), "countries\n")
+
+#--- H1 split: pop65 -> Deposit_Ratio ---
+
+h1_bank <- feols(Deposit_Ratio ~ pop65_pct +
+                   Bismarckian + Beveridgean +
+                   log_assets + Tier_1_Ratio + nim + equity_ratio +
+                   gdp_growth_pct + interest_rate_pct +
+                   GDP_per_Capita_PPP + unemployment_rate_pct
+                 | fiscal_year,
+                 data    = df_bank_based,
+                 cluster = ~Country)
+
+h1_market <- feols(Deposit_Ratio ~ pop65_pct +
+                     Bismarckian + Beveridgean +
+                     log_assets + Tier_1_Ratio + nim + equity_ratio +
+                     gdp_growth_pct + interest_rate_pct +
+                     GDP_per_Capita_PPP + unemployment_rate_pct
+                   | fiscal_year,
+                   data    = df_market_based,
+                   cluster = ~Country)
+
+etable(h1_bank, h1_market,
+       headers = c("H1 Bank-based", "H1 Market-based"),
+       dict = c(pop65_pct             = "Population 65+%",
+                Bismarckian           = "Bismarckian",
+                Beveridgean           = "Beveridgean",
+                log_assets            = "Log(Assets)",
+                Tier_1_Ratio          = "Tier 1 Ratio",
+                nim                   = "NIM",
+                equity_ratio          = "Equity Ratio",
+                gdp_growth_pct        = "GDP Growth%",
+                interest_rate_pct     = "Interest Rate%",
+                GDP_per_Capita_PPP    = "GDP per Capita PPP",
+                unemployment_rate_pct = "Unemployment%"),
+       se.below  = TRUE,
+       fitstat   = ~ r2 + n,
+       notes     = "Year FE. Country-clustered SEs in parentheses.",
+       style.tex = style.tex("base"),
+       tex       = TRUE)
+
+#--- H2 split: pop65 x FinStructure -> Deposit_Ratio ---
+
+h2_bank <- feols(Deposit_Ratio ~ pop65_pct * FinStructure +
+                   Bismarckian + Beveridgean +
+                   log_assets + Tier_1_Ratio + nim + equity_ratio +
+                   gdp_growth_pct + interest_rate_pct +
+                   GDP_per_Capita_PPP + unemployment_rate_pct
+                 | fiscal_year,
+                 data    = df_bank_based,
+                 cluster = ~Country)
+
+h2_market <- feols(Deposit_Ratio ~ pop65_pct * FinStructure +
+                     Bismarckian + Beveridgean +
+                     log_assets + Tier_1_Ratio + nim + equity_ratio +
+                     gdp_growth_pct + interest_rate_pct +
+                     GDP_per_Capita_PPP + unemployment_rate_pct
+                   | fiscal_year,
+                   data    = df_market_based,
+                   cluster = ~Country)
+
+etable(h2_bank, h2_market,
+       headers = c("H2 Bank-based", "H2 Market-based"),
+       dict = c(pop65_pct                = "Population 65+%",
+                FinStructure             = "Financial Structure",
+                Bismarckian              = "Bismarckian",
+                Beveridgean              = "Beveridgean",
+                log_assets               = "Log(Assets)",
+                Tier_1_Ratio             = "Tier 1 Ratio",
+                nim                      = "NIM",
+                equity_ratio             = "Equity Ratio",
+                gdp_growth_pct           = "GDP Growth%",
+                interest_rate_pct        = "Interest Rate%",
+                GDP_per_Capita_PPP       = "GDP per Capita PPP",
+                unemployment_rate_pct    = "Unemployment%",
+                `pop65_pct:FinStructure` = "Pop 65+% x Fin. Structure"),
+       se.below  = TRUE,
+       fitstat   = ~ r2 + n,
+       notes     = "Year FE. Country-clustered SEs in parentheses.",
+       style.tex = style.tex("base"),
+       tex       = TRUE)
+
+#--- H3 split: Share_85plus -> Deposit_Ratio ---
+
+h3_bank <- feols(Deposit_Ratio ~ Share_85plus +
+                   Bismarckian + Beveridgean +
+                   log_assets + Tier_1_Ratio + nim + equity_ratio +
+                   gdp_growth_pct + interest_rate_pct +
+                   GDP_per_Capita_PPP + unemployment_rate_pct
+                 | fiscal_year,
+                 data    = df_bank_based,
+                 cluster = ~Country)
+
+h3_market <- feols(Deposit_Ratio ~ Share_85plus +
+                     Bismarckian + Beveridgean +
+                     log_assets + Tier_1_Ratio + nim + equity_ratio +
+                     gdp_growth_pct + interest_rate_pct +
+                     GDP_per_Capita_PPP + unemployment_rate_pct
+                   | fiscal_year,
+                   data    = df_market_based,
+                   cluster = ~Country)
+
+etable(h3_bank, h3_market,
+       headers = c("H3 Bank-based", "H3 Market-based"),
+       dict = c(Share_85plus          = "Population 85+%",
+                Bismarckian           = "Bismarckian",
+                Beveridgean           = "Beveridgean",
+                log_assets            = "Log(Assets)",
+                Tier_1_Ratio          = "Tier 1 Ratio",
+                nim                   = "NIM",
+                equity_ratio          = "Equity Ratio",
+                gdp_growth_pct        = "GDP Growth%",
+                interest_rate_pct     = "Interest Rate%",
+                GDP_per_Capita_PPP    = "GDP per Capita PPP",
+                unemployment_rate_pct = "Unemployment%"),
+       se.below  = TRUE,
+       fitstat   = ~ r2 + n,
+       notes     = "Year FE. Country-clustered SEs in parentheses.",
+       style.tex = style.tex("base"),
+       tex       = TRUE)
+
+
+# ============================================================
+# Step 8: WILD CLUSTER BOOTSTRAP
+# Reference: Cameron, Gelbach & Miller (2008)
+#            Cameron & Miller (2015, Journal of Human Resources)
+# ============================================================
+
+# install.packages(c("dqrng", "JuliaConnectoR", "dreamerr", "collapse",
+                   "gtools", "Rcpp", "RcppArmadillo", "Matrix", "foreach"))
+library(fwildclusterboot)
+
+set.seed(42)
+dqrng::dqset.seed(42)
+B <- 9999
+
+#--- 8a: Prepare clean bootstrap datasets (remove singleton FEs) ---
+
+# Full sample
+df_boot_full <- df_clean %>%
+  filter(!is.na(FinStructure)) %>%
+  arrange(Entity.ID, fiscal_year)
+
+boot_check_full <- feols(
+  Deposit_Ratio ~ pop65_pct +
+    Bismarckian + Beveridgean +
+    log_assets + Tier_1_Ratio + nim + equity_ratio +
+    gdp_growth_pct + interest_rate_pct +
+    GDP_per_Capita_PPP + unemployment_rate_pct
+  | fiscal_year,
+  data    = df_boot_full,
+  cluster = ~Country_Region
+)
+
+removed_full <- boot_check_full$fixef_removed$fiscal_year
+df_boot_full <- df_boot_full %>%
+  filter(!fiscal_year %in% removed_full) %>%
+  mutate(fiscal_year = as.numeric(gsub("FY", "", fiscal_year)))
+
+# Bank-based subsample
+df_boot_bank <- df_bank_based %>%
+  filter(!is.na(FinStructure)) %>%
+  arrange(Entity.ID, fiscal_year)
+
+boot_check_bank <- feols(
+  Deposit_Ratio ~ pop65_pct +
+    Bismarckian + Beveridgean +
+    log_assets + Tier_1_Ratio + nim + equity_ratio +
+    gdp_growth_pct + interest_rate_pct +
+    GDP_per_Capita_PPP + unemployment_rate_pct
+  | fiscal_year,
+  data    = df_boot_bank,
+  cluster = ~Country_Region
+)
+
+removed_bank <- boot_check_bank$fixef_removed$fiscal_year
+df_boot_bank <- df_boot_bank %>%
+  filter(!fiscal_year %in% removed_bank) %>%
+  mutate(fiscal_year = as.numeric(gsub("FY", "", fiscal_year)))
+
+# Market-based subsample
+df_boot_market <- df_market_based %>%
+  filter(!is.na(FinStructure)) %>%
+  arrange(Entity.ID, fiscal_year)
+
+boot_check_market <- feols(
+  Deposit_Ratio ~ pop65_pct +
+    Bismarckian + Beveridgean +
+    log_assets + Tier_1_Ratio + nim + equity_ratio +
+    gdp_growth_pct + interest_rate_pct +
+    GDP_per_Capita_PPP + unemployment_rate_pct
+  | fiscal_year,
+  data    = df_boot_market,
+  cluster = ~Country_Region
+)
+
+removed_market <- boot_check_market$fixef_removed$fiscal_year
+df_boot_market <- df_boot_market %>%
+  filter(!fiscal_year %in% removed_market) %>%
+  mutate(fiscal_year = as.numeric(gsub("FY", "", fiscal_year)))
+
+cat("Boot bank-based:   ", nrow(df_boot_bank),   "obs after singleton removal\n")
+cat("Boot market-based: ", nrow(df_boot_market), "obs after singleton removal\n")
+
+#--- 8b: Refit models on clean bootstrap data ---
+
+# Full sample
+boot_fit_h1_full <- feols(
+  Deposit_Ratio ~ pop65_pct +
+    Bismarckian + Beveridgean +
+    log_assets + Tier_1_Ratio + nim + equity_ratio +
+    gdp_growth_pct + interest_rate_pct +
+    GDP_per_Capita_PPP + unemployment_rate_pct
+  | fiscal_year,
+  data = df_boot_full, cluster = ~Country_Region)
+
+boot_fit_h2_full <- feols(
+  Deposit_Ratio ~ pop65_pct * FinStructure +
+    Bismarckian + Beveridgean +
+    log_assets + Tier_1_Ratio + nim + equity_ratio +
+    gdp_growth_pct + interest_rate_pct +
+    GDP_per_Capita_PPP + unemployment_rate_pct
+  | fiscal_year,
+  data = df_boot_full, cluster = ~Country_Region)
+
+boot_fit_h3_full <- feols(
+  Deposit_Ratio ~ Share_85plus +
+    Bismarckian + Beveridgean +
+    log_assets + Tier_1_Ratio + nim + equity_ratio +
+    gdp_growth_pct + interest_rate_pct +
+    GDP_per_Capita_PPP + unemployment_rate_pct
+  | fiscal_year,
+  data = df_boot_full, cluster = ~Country_Region)
+
+# H1
+boot_fit_h1_bank <- feols(
+  Deposit_Ratio ~ pop65_pct +
+    Bismarckian + Beveridgean +
+    log_assets + Tier_1_Ratio + nim + equity_ratio +
+    gdp_growth_pct + interest_rate_pct +
+    GDP_per_Capita_PPP + unemployment_rate_pct
+  | fiscal_year,
+  data = df_boot_bank, cluster = ~Country_Region)
+
+boot_fit_h1_market <- feols(
+  Deposit_Ratio ~ pop65_pct +
+    Bismarckian + Beveridgean +
+    log_assets + Tier_1_Ratio + nim + equity_ratio +
+    gdp_growth_pct + interest_rate_pct +
+    GDP_per_Capita_PPP + unemployment_rate_pct
+  | fiscal_year,
+  data = df_boot_market, cluster = ~Country_Region)
+
+# H2
+boot_fit_h2_bank <- feols(
+  Deposit_Ratio ~ pop65_pct * FinStructure +
+    Bismarckian + Beveridgean +
+    log_assets + Tier_1_Ratio + nim + equity_ratio +
+    gdp_growth_pct + interest_rate_pct +
+    GDP_per_Capita_PPP + unemployment_rate_pct
+  | fiscal_year,
+  data = df_boot_bank, cluster = ~Country_Region)
+
+boot_fit_h2_market <- feols(
+  Deposit_Ratio ~ pop65_pct * FinStructure +
+    Bismarckian + Beveridgean +
+    log_assets + Tier_1_Ratio + nim + equity_ratio +
+    gdp_growth_pct + interest_rate_pct +
+    GDP_per_Capita_PPP + unemployment_rate_pct
+  | fiscal_year,
+  data = df_boot_market, cluster = ~Country_Region)
+
+# H3
+boot_fit_h3_bank <- feols(
+  Deposit_Ratio ~ Share_85plus +
+    Bismarckian + Beveridgean +
+    log_assets + Tier_1_Ratio + nim + equity_ratio +
+    gdp_growth_pct + interest_rate_pct +
+    GDP_per_Capita_PPP + unemployment_rate_pct
+  | fiscal_year,
+  data = df_boot_bank, cluster = ~Country_Region)
+
+boot_fit_h3_market <- feols(
+  Deposit_Ratio ~ Share_85plus +
+    Bismarckian + Beveridgean +
+    log_assets + Tier_1_Ratio + nim + equity_ratio +
+    gdp_growth_pct + interest_rate_pct +
+    GDP_per_Capita_PPP + unemployment_rate_pct
+  | fiscal_year,
+  data = df_boot_market, cluster = ~Country_Region)
+
+#--- 8c: Run wild cluster bootstrap (Rademacher weights) ---
+
+# Full sample
+boot_h1_full <- boottest(boot_fit_h1_full, clustid = "Country_Region", param = "pop65_pct", B = B)
+summary(boot_h1_full)
+
+boot_h2_full_pop65    <- boottest(boot_fit_h2_full, clustid = "Country_Region", param = "pop65_pct",             B = B)
+boot_h2_full_fin      <- boottest(boot_fit_h2_full, clustid = "Country_Region", param = "FinStructure",           B = B)
+boot_h2_full_interact <- boottest(boot_fit_h2_full, clustid = "Country_Region", param = "pop65_pct:FinStructure", B = B)
+summary(boot_h2_full_pop65)
+summary(boot_h2_full_fin)
+summary(boot_h2_full_interact)
+
+boot_h3_full <- boottest(boot_fit_h3_full, clustid = "Country_Region", param = "Share_85plus", B = B)
+summary(boot_h3_full)
+
+# H1
+boot_h1_bank   <- boottest(boot_fit_h1_bank,   clustid = "Country_Region", param = "pop65_pct", B = B)
+boot_h1_market <- boottest(boot_fit_h1_market,  clustid = "Country_Region", param = "pop65_pct", B = B)
+
+summary(boot_h1_bank)
+summary(boot_h1_market)
+plot(boot_h1_bank)
+plot(boot_h1_market)
+
+# H2
+boot_h2_bank_pop65    <- boottest(boot_fit_h2_bank,   clustid = "Country_Region", param = "pop65_pct",             B = B)
+boot_h2_bank_fin      <- boottest(boot_fit_h2_bank,   clustid = "Country_Region", param = "FinStructure",           B = B)
+boot_h2_bank_interact <- boottest(boot_fit_h2_bank,   clustid = "Country_Region", param = "pop65_pct:FinStructure", B = B)
+
+boot_h2_market_pop65    <- boottest(boot_fit_h2_market, clustid = "Country_Region", param = "pop65_pct",             B = B)
+boot_h2_market_fin      <- boottest(boot_fit_h2_market, clustid = "Country_Region", param = "FinStructure",           B = B)
+boot_h2_market_interact <- boottest(boot_fit_h2_market, clustid = "Country_Region", param = "pop65_pct:FinStructure", B = B)
+
+summary(boot_h2_bank_pop65)
+summary(boot_h2_bank_fin)
+summary(boot_h2_bank_interact)
+summary(boot_h2_market_pop65)
+summary(boot_h2_market_fin)
+summary(boot_h2_market_interact)
+plot(boot_h2_bank_interact)
+plot(boot_h2_market_interact)
+
+# H3
+boot_h3_bank   <- boottest(boot_fit_h3_bank,   clustid = "Country_Region", param = "Share_85plus", B = B)
+boot_h3_market <- boottest(boot_fit_h3_market,  clustid = "Country_Region", param = "Share_85plus", B = B)
+
+summary(boot_h3_bank)
+summary(boot_h3_market)
+plot(boot_h3_bank)
+plot(boot_h3_market)
+
+#--- 8d: Combined regression tables with bootstrap p-values ---
+
+format_boot_p <- function(p, B = 9999) {
+  min_p <- 1 / B
+  if (p < min_p) return(paste0("< ", round(min_p, 4)))
+  return(as.character(round(p, 4)))
+}
+
+# H1 table
+etable(h1.3, h1_bank, h1_market,
+       headers = c("Full Sample", "Bank-based", "Market-based"),
+       dict = c(pop65_pct             = "Population 65+%",
+                Bismarckian           = "Bismarckian",
+                Beveridgean           = "Beveridgean",
+                log_assets            = "Log(Assets)",
+                Tier_1_Ratio          = "Tier 1 Ratio",
+                nim                   = "NIM",
+                equity_ratio          = "Equity Ratio",
+                gdp_growth_pct        = "GDP Growth%",
+                interest_rate_pct     = "Interest Rate%",
+                GDP_per_Capita_PPP    = "GDP per Capita PPP",
+                unemployment_rate_pct = "Unemployment%"),
+       se.below  = TRUE,
+       fitstat   = ~ r2 + n,
+       extralines = list(
+         "_Boot p (Pop 65+%)" = c(format_boot_p(boot_h1_full$p_val),
+                                  format_boot_p(boot_h1_bank$p_val),
+                                  format_boot_p(boot_h1_market$p_val))
+       ),
+       notes     = "Year FE. Country-region-clustered SEs in parentheses. Wild cluster bootstrap p-values (Rademacher, 9,999 iter.) following Cameron, Gelbach & Miller (2008).",
+       style.tex = style.tex("base"),
+       tex       = TRUE)
+
+# H2 table
+etable(m5, h2_bank, h2_market,
+       headers = c("Full Sample", "Bank-based", "Market-based"),
+       dict = c(pop65_pct                = "Population 65+%",
+                FinStructure             = "Financial Structure",
+                Bismarckian              = "Bismarckian",
+                Beveridgean              = "Beveridgean",
+                log_assets               = "Log(Assets)",
+                Tier_1_Ratio             = "Tier 1 Ratio",
+                nim                      = "NIM",
+                equity_ratio             = "Equity Ratio",
+                gdp_growth_pct           = "GDP Growth%",
+                interest_rate_pct        = "Interest Rate%",
+                GDP_per_Capita_PPP       = "GDP per Capita PPP",
+                unemployment_rate_pct    = "Unemployment%",
+                `pop65_pct:FinStructure` = "Pop 65+% x Fin. Structure"),
+       se.below  = TRUE,
+       fitstat   = ~ r2 + n,
+       extralines = list(
+         "_Boot p (Pop 65+%)"     = c(format_boot_p(boot_h2_full_pop65$p_val),
+                                      format_boot_p(boot_h2_bank_pop65$p_val),
+                                      format_boot_p(boot_h2_market_pop65$p_val)),
+         "_Boot p (FinStructure)" = c(format_boot_p(boot_h2_full_fin$p_val),
+                                      format_boot_p(boot_h2_bank_fin$p_val),
+                                      format_boot_p(boot_h2_market_fin$p_val)),
+         "_Boot p (Pop65xFinStr)" = c(format_boot_p(boot_h2_full_interact$p_val),
+                                      format_boot_p(boot_h2_bank_interact$p_val),
+                                      format_boot_p(boot_h2_market_interact$p_val))
+       ),
+       notes     = "Year FE. Country-region-clustered SEs in parentheses. Wild cluster bootstrap p-values (Rademacher, 9,999 iter.) following Cameron, Gelbach & Miller (2008).",
+       style.tex = style.tex("base"),
+       tex       = TRUE)
+
+# H3 table
+etable(h3.3, h3_bank, h3_market,
+       headers = c("Full Sample", "Bank-based", "Market-based"),
+       dict = c(Share_85plus          = "Population 85+%",
+                Bismarckian           = "Bismarckian",
+                Beveridgean           = "Beveridgean",
+                log_assets            = "Log(Assets)",
+                Tier_1_Ratio          = "Tier 1 Ratio",
+                nim                   = "NIM",
+                equity_ratio          = "Equity Ratio",
+                gdp_growth_pct        = "GDP Growth%",
+                interest_rate_pct     = "Interest Rate%",
+                GDP_per_Capita_PPP    = "GDP per Capita PPP",
+                unemployment_rate_pct = "Unemployment%"),
+       se.below  = TRUE,
+       fitstat   = ~ r2 + n,
+       extralines = list(
+         "_Boot p (Pop 85+%)" = c(format_boot_p(boot_h3_full$p_val),
+                                  format_boot_p(boot_h3_bank$p_val),
+                                  format_boot_p(boot_h3_market$p_val))
+       ),
+       notes     = "Year FE. Country-region-clustered SEs in parentheses. Wild cluster bootstrap p-values (Rademacher, 9,999 iter.) following Cameron, Gelbach & Miller (2008).",
+       style.tex = style.tex("base"),
+       tex       = TRUE)
+
+
+#--------Step 9: Stargazer LaTeX Regression Overview------------
+# stargazer requires lm/glm objects — refit full specs with lm() + year dummies
+# Note: point estimates identical to feols; SEs in table are OLS (see add.lines for clustering note)
+
+# Full sample
+lm_h1_full <- lm(Deposit_Ratio ~ pop65_pct +
+                    Bismarckian + Beveridgean +
+                    log_assets + Tier_1_Ratio + nim + equity_ratio +
+                    gdp_growth_pct + interest_rate_pct +
+                    GDP_per_Capita_PPP + unemployment_rate_pct +
+                    as.factor(fiscal_year),
+                  data = df_clean)
+
+lm_h2_full <- lm(Deposit_Ratio ~ pop65_pct * FinStructure +
+                    Bismarckian + Beveridgean +
+                    log_assets + Tier_1_Ratio + nim + equity_ratio +
+                    gdp_growth_pct + interest_rate_pct +
+                    GDP_per_Capita_PPP + unemployment_rate_pct +
+                    as.factor(fiscal_year),
+                  data = df_clean)
+
+lm_h3_full <- lm(Deposit_Ratio ~ Share_85plus +
+                    Bismarckian + Beveridgean +
+                    log_assets + Tier_1_Ratio + nim + equity_ratio +
+                    gdp_growth_pct + interest_rate_pct +
+                    GDP_per_Capita_PPP + unemployment_rate_pct +
+                    as.factor(fiscal_year),
+                  data = df_clean)
+
+# Bank-based split
+lm_h1_bb <- lm(Deposit_Ratio ~ pop65_pct +
+                  Bismarckian + Beveridgean +
+                  log_assets + Tier_1_Ratio + nim + equity_ratio +
+                  gdp_growth_pct + interest_rate_pct +
+                  GDP_per_Capita_PPP + unemployment_rate_pct +
+                  as.factor(fiscal_year),
+                data = df_bank_based)
+
+lm_h2_bb <- lm(Deposit_Ratio ~ pop65_pct * FinStructure +
+                  Bismarckian + Beveridgean +
+                  log_assets + Tier_1_Ratio + nim + equity_ratio +
+                  gdp_growth_pct + interest_rate_pct +
+                  GDP_per_Capita_PPP + unemployment_rate_pct +
+                  as.factor(fiscal_year),
+                data = df_bank_based)
+
+lm_h3_bb <- lm(Deposit_Ratio ~ Share_85plus +
+                  Bismarckian + Beveridgean +
+                  log_assets + Tier_1_Ratio + nim + equity_ratio +
+                  gdp_growth_pct + interest_rate_pct +
+                  GDP_per_Capita_PPP + unemployment_rate_pct +
+                  as.factor(fiscal_year),
+                data = df_bank_based)
+
+# Market-based split
+lm_h1_mb <- lm(Deposit_Ratio ~ pop65_pct +
+                  Bismarckian + Beveridgean +
+                  log_assets + Tier_1_Ratio + nim + equity_ratio +
+                  gdp_growth_pct + interest_rate_pct +
+                  GDP_per_Capita_PPP + unemployment_rate_pct +
+                  as.factor(fiscal_year),
+                data = df_market_based)
+
+lm_h2_mb <- lm(Deposit_Ratio ~ pop65_pct * FinStructure +
+                  Bismarckian + Beveridgean +
+                  log_assets + Tier_1_Ratio + nim + equity_ratio +
+                  gdp_growth_pct + interest_rate_pct +
+                  GDP_per_Capita_PPP + unemployment_rate_pct +
+                  as.factor(fiscal_year),
+                data = df_market_based)
+
+lm_h3_mb <- lm(Deposit_Ratio ~ Share_85plus +
+                  Bismarckian + Beveridgean +
+                  log_assets + Tier_1_Ratio + nim + equity_ratio +
+                  gdp_growth_pct + interest_rate_pct +
+                  GDP_per_Capita_PPP + unemployment_rate_pct +
+                  as.factor(fiscal_year),
+                data = df_market_based)
+
+# Create output directory
+dir.create("tables", showWarnings = FALSE)
+
+# H1 overview: Full | Bank-based | Market-based
+stargazer(lm_h1_full, lm_h1_bb, lm_h1_mb,
+          type  = "latex",
+          title = "H1: Demographic Ageing and Deposit Ratios --- Split by Financial System",
+          dep.var.labels   = "Deposit Ratio",
+          column.labels    = c("Full Sample", "Bank-based", "Market-based"),
+          covariate.labels = c("Population 65+\\%",
+                               "Bismarckian", "Beveridgean",
+                               "Log(Assets)", "Tier 1 Ratio", "NIM", "Equity Ratio",
+                               "GDP Growth\\%", "Interest Rate\\%",
+                               "GDP per Capita PPP", "Unemployment\\%"),
+          keep             = c("pop65_pct", "Bismarckian", "Beveridgean",
+                               "log_assets", "Tier_1_Ratio", "nim", "equity_ratio",
+                               "gdp_growth_pct", "interest_rate_pct",
+                               "GDP_per_Capita_PPP", "unemployment_rate_pct"),
+          omit.stat        = c("f", "ser"),
+          add.lines        = list(
+            c("Year FE", "Yes", "Yes", "Yes"),
+            c("Clustering", "Country-Region", "Country-Region", "Country-Region"),
+            c("Boot p (Pop 65+\\%)",
+              format_boot_p(boot_h1_full$p_val),
+              format_boot_p(boot_h1_bank$p_val),
+              format_boot_p(boot_h1_market$p_val))
+          ),
+          notes            = "Country-region-clustered SEs. Bootstrap p-values (Rademacher, 9,999 iter.).",
+          notes.append     = FALSE,
+          no.space         = TRUE)
+
+# H2 overview: Full | Bank-based | Market-based
+stargazer(lm_h2_full, lm_h2_bb, lm_h2_mb,
+          type  = "latex",
+          title = "H2: Financial Structure Moderation --- Split by Financial System",
+          dep.var.labels   = "Deposit Ratio",
+          column.labels    = c("Full Sample", "Bank-based", "Market-based"),
+          covariate.labels = c("Population 65+\\%", "Financial Structure",
+                               "Bismarckian", "Beveridgean",
+                               "Log(Assets)", "Tier 1 Ratio", "NIM", "Equity Ratio",
+                               "GDP Growth\\%", "Interest Rate\\%",
+                               "GDP per Capita PPP", "Unemployment\\%",
+                               "Pop 65+\\% $\\times$ Fin.\\ Structure"),
+          keep             = c("pop65_pct", "FinStructure",
+                               "Bismarckian", "Beveridgean",
+                               "log_assets", "Tier_1_Ratio", "nim", "equity_ratio",
+                               "gdp_growth_pct", "interest_rate_pct",
+                               "GDP_per_Capita_PPP", "unemployment_rate_pct",
+                               "pop65_pct:FinStructure"),
+          omit.stat        = c("f", "ser"),
+          add.lines        = list(
+            c("Year FE", "Yes", "Yes", "Yes"),
+            c("Clustering", "Country-Region", "Country-Region", "Country-Region"),
+            c("Boot p (Pop 65+\\%)",
+              format_boot_p(boot_h2_full_pop65$p_val),
+              format_boot_p(boot_h2_bank_pop65$p_val),
+              format_boot_p(boot_h2_market_pop65$p_val)),
+            c("Boot p (FinStructure)",
+              format_boot_p(boot_h2_full_fin$p_val),
+              format_boot_p(boot_h2_bank_fin$p_val),
+              format_boot_p(boot_h2_market_fin$p_val)),
+            c("Boot p (Pop65$\\times$FinStr)",
+              format_boot_p(boot_h2_full_interact$p_val),
+              format_boot_p(boot_h2_bank_interact$p_val),
+              format_boot_p(boot_h2_market_interact$p_val))
+          ),
+          notes            = "Country-region-clustered SEs. Bootstrap p-values (Rademacher, 9,999 iter.).",
+          notes.append     = FALSE,
+          no.space         = TRUE)
+
+# H3 overview: Full | Bank-based | Market-based
+stargazer(lm_h3_full, lm_h3_bb, lm_h3_mb,
+          type  = "latex",
+          title = "H3: The Distinct Effect of the Oldest --- Split by Financial System",
+          dep.var.labels   = "Deposit Ratio",
+          column.labels    = c("Full Sample", "Bank-based", "Market-based"),
+          covariate.labels = c("Population 85+\\%",
+                               "Bismarckian", "Beveridgean",
+                               "Log(Assets)", "Tier 1 Ratio", "NIM", "Equity Ratio",
+                               "GDP Growth\\%", "Interest Rate\\%",
+                               "GDP per Capita PPP", "Unemployment\\%"),
+          keep             = c("Share_85plus", "Bismarckian", "Beveridgean",
+                               "log_assets", "Tier_1_Ratio", "nim", "equity_ratio",
+                               "gdp_growth_pct", "interest_rate_pct",
+                               "GDP_per_Capita_PPP", "unemployment_rate_pct"),
+          omit.stat        = c("f", "ser"),
+          add.lines        = list(
+            c("Year FE", "Yes", "Yes", "Yes"),
+            c("Clustering", "Country-Region", "Country-Region", "Country-Region"),
+            c("Boot p (Pop 85+\\%)",
+              format_boot_p(boot_h3_full$p_val),
+              format_boot_p(boot_h3_bank$p_val),
+              format_boot_p(boot_h3_market$p_val))
+          ),
+          notes            = "Country-region-clustered SEs. Bootstrap p-values (Rademacher, 9,999 iter.).",
+          notes.append     = FALSE,
+          no.space         = TRUE)
+
+
+#--------Step 10: Europe-Only — Split-Sample Regressions & Wild-Cluster Bootstrap------------
+# Filter to EU27 + Switzerland + United Kingdom
+eu_countries <- c(
+  "Austria", "Belgium", "Bulgaria", "Croatia", "Cyprus", "Czechia",
+  "Denmark", "Estonia", "Finland", "France", "Germany", "Greece",
+  "Hungary", "Ireland", "Italy", "Latvia", "Lithuania", "Luxembourg",
+  "Malta", "Netherlands", "Poland", "Portugal", "Romania", "Slovakia",
+  "Slovenia", "Spain", "Sweden", "Switzerland", "United Kingdom"
+)
+
+df_eu <- df_clean %>% filter(Country %in% eu_countries)
+df_eu_bank   <- df_eu %>% filter(!is.na(FinStructure), FinStructure < 0)
+df_eu_market <- df_eu %>% filter(!is.na(FinStructure), FinStructure >= 0)
+
+cat("Europe-Only sample:        ", nrow(df_eu),        "obs,", n_distinct(df_eu$Country),        "countries\n")
+cat("Europe-Only bank-based:    ", nrow(df_eu_bank),   "obs,", n_distinct(df_eu_bank$Country),   "countries\n")
+cat("Europe-Only market-based:  ", nrow(df_eu_market), "obs,", n_distinct(df_eu_market$Country), "countries\n")
+
+#--- 10a: Regressions — EU full sample ---
+
+eu_h1 <- feols(Deposit_Ratio ~ pop65_pct +
+                 Bismarckian + Beveridgean +
+                 log_assets + Tier_1_Ratio + nim + equity_ratio +
+                 gdp_growth_pct + interest_rate_pct +
+                 GDP_per_Capita_PPP + unemployment_rate_pct
+               | fiscal_year,
+               data = df_eu, cluster = ~Country_Region)
+
+eu_m5 <- feols(Deposit_Ratio ~ pop65_pct * FinStructure +
+                 Bismarckian + Beveridgean +
+                 log_assets + Tier_1_Ratio + nim + equity_ratio +
+                 gdp_growth_pct + interest_rate_pct +
+                 GDP_per_Capita_PPP + unemployment_rate_pct
+               | fiscal_year,
+               data = df_eu, cluster = ~Country_Region)
+
+eu_h3 <- feols(Deposit_Ratio ~ Share_85plus +
+                 Bismarckian + Beveridgean +
+                 log_assets + Tier_1_Ratio + nim + equity_ratio +
+                 gdp_growth_pct + interest_rate_pct +
+                 GDP_per_Capita_PPP + unemployment_rate_pct
+               | fiscal_year,
+               data = df_eu, cluster = ~Country_Region)
+
+#--- 10b: Regressions — EU bank-based ---
+
+eu_h1_bank <- feols(Deposit_Ratio ~ pop65_pct +
+                      Bismarckian + Beveridgean +
+                      log_assets + Tier_1_Ratio + nim + equity_ratio +
+                      gdp_growth_pct + interest_rate_pct +
+                      GDP_per_Capita_PPP + unemployment_rate_pct
+                    | fiscal_year,
+                    data = df_eu_bank, cluster = ~Country_Region)
+
+eu_h2_bank <- feols(Deposit_Ratio ~ pop65_pct * FinStructure +
+                      Bismarckian + Beveridgean +
+                      log_assets + Tier_1_Ratio + nim + equity_ratio +
+                      gdp_growth_pct + interest_rate_pct +
+                      GDP_per_Capita_PPP + unemployment_rate_pct
+                    | fiscal_year,
+                    data = df_eu_bank, cluster = ~Country_Region)
+
+eu_h3_bank <- feols(Deposit_Ratio ~ Share_85plus +
+                      Bismarckian + Beveridgean +
+                      log_assets + Tier_1_Ratio + nim + equity_ratio +
+                      gdp_growth_pct + interest_rate_pct +
+                      GDP_per_Capita_PPP + unemployment_rate_pct
+                    | fiscal_year,
+                    data = df_eu_bank, cluster = ~Country_Region)
+
+#--- 10c: Regressions — EU market-based ---
+
+eu_h1_market <- feols(Deposit_Ratio ~ pop65_pct +
+                        Bismarckian + Beveridgean +
+                        log_assets + Tier_1_Ratio + nim + equity_ratio +
+                        gdp_growth_pct + interest_rate_pct +
+                        GDP_per_Capita_PPP + unemployment_rate_pct
+                      | fiscal_year,
+                      data = df_eu_market, cluster = ~Country_Region)
+
+eu_h2_market <- feols(Deposit_Ratio ~ pop65_pct * FinStructure +
+                        Bismarckian + Beveridgean +
+                        log_assets + Tier_1_Ratio + nim + equity_ratio +
+                        gdp_growth_pct + interest_rate_pct +
+                        GDP_per_Capita_PPP + unemployment_rate_pct
+                      | fiscal_year,
+                      data = df_eu_market, cluster = ~Country_Region)
+
+eu_h3_market <- feols(Deposit_Ratio ~ Share_85plus +
+                        Bismarckian + Beveridgean +
+                        log_assets + Tier_1_Ratio + nim + equity_ratio +
+                        gdp_growth_pct + interest_rate_pct +
+                        GDP_per_Capita_PPP + unemployment_rate_pct
+                      | fiscal_year,
+                      data = df_eu_market, cluster = ~Country_Region)
+
+#--- 10d: Wild-Cluster Bootstrap — Europe only ---
+
+set.seed(42)
+dqrng::dqset.seed(42)
+
+# EU Full sample — prepare clean bootstrap data
+df_eu_boot_full <- df_eu %>%
+  filter(!is.na(FinStructure)) %>%
+  arrange(Entity.ID, fiscal_year)
+
+eu_boot_check_full <- feols(
+  Deposit_Ratio ~ pop65_pct +
+    Bismarckian + Beveridgean +
+    log_assets + Tier_1_Ratio + nim + equity_ratio +
+    gdp_growth_pct + interest_rate_pct +
+    GDP_per_Capita_PPP + unemployment_rate_pct
+  | fiscal_year,
+  data = df_eu_boot_full, cluster = ~Country_Region)
+
+eu_removed_full <- eu_boot_check_full$fixef_removed$fiscal_year
+df_eu_boot_full <- df_eu_boot_full %>%
+  filter(!fiscal_year %in% eu_removed_full) %>%
+  mutate(fiscal_year = as.numeric(gsub("FY", "", fiscal_year)))
+
+# Prepare clean bootstrap datasets
+df_eu_boot_bank <- df_eu_bank %>%
+  filter(!is.na(FinStructure)) %>%
+  arrange(Entity.ID, fiscal_year)
+
+eu_boot_check_bank <- feols(
+  Deposit_Ratio ~ pop65_pct +
+    Bismarckian + Beveridgean +
+    log_assets + Tier_1_Ratio + nim + equity_ratio +
+    gdp_growth_pct + interest_rate_pct +
+    GDP_per_Capita_PPP + unemployment_rate_pct
+  | fiscal_year,
+  data = df_eu_boot_bank, cluster = ~Country_Region)
+
+eu_removed_bank <- eu_boot_check_bank$fixef_removed$fiscal_year
+df_eu_boot_bank <- df_eu_boot_bank %>%
+  filter(!fiscal_year %in% eu_removed_bank) %>%
+  mutate(fiscal_year = as.numeric(gsub("FY", "", fiscal_year)))
+
+df_eu_boot_market <- df_eu_market %>%
+  filter(!is.na(FinStructure)) %>%
+  arrange(Entity.ID, fiscal_year)
+
+eu_boot_check_market <- feols(
+  Deposit_Ratio ~ pop65_pct +
+    Bismarckian + Beveridgean +
+    log_assets + Tier_1_Ratio + nim + equity_ratio +
+    gdp_growth_pct + interest_rate_pct +
+    GDP_per_Capita_PPP + unemployment_rate_pct
+  | fiscal_year,
+  data = df_eu_boot_market, cluster = ~Country_Region)
+
+eu_removed_market <- eu_boot_check_market$fixef_removed$fiscal_year
+df_eu_boot_market <- df_eu_boot_market %>%
+  filter(!fiscal_year %in% eu_removed_market) %>%
+  mutate(fiscal_year = as.numeric(gsub("FY", "", fiscal_year)))
+
+cat("Europe-Only boot bank-based:   ", nrow(df_eu_boot_bank),   "obs after singleton removal\n")
+cat("Europe-Only boot market-based: ", nrow(df_eu_boot_market), "obs after singleton removal\n")
+
+# Refit on clean bootstrap data
+# EU Full sample refits
+eu_boot_h1_full_fit <- feols(
+  Deposit_Ratio ~ pop65_pct +
+    Bismarckian + Beveridgean +
+    log_assets + Tier_1_Ratio + nim + equity_ratio +
+    gdp_growth_pct + interest_rate_pct +
+    GDP_per_Capita_PPP + unemployment_rate_pct
+  | fiscal_year,
+  data = df_eu_boot_full, cluster = ~Country_Region)
+
+eu_boot_h2_full_fit <- feols(
+  Deposit_Ratio ~ pop65_pct * FinStructure +
+    Bismarckian + Beveridgean +
+    log_assets + Tier_1_Ratio + nim + equity_ratio +
+    gdp_growth_pct + interest_rate_pct +
+    GDP_per_Capita_PPP + unemployment_rate_pct
+  | fiscal_year,
+  data = df_eu_boot_full, cluster = ~Country_Region)
+
+eu_boot_h3_full_fit <- feols(
+  Deposit_Ratio ~ Share_85plus +
+    Bismarckian + Beveridgean +
+    log_assets + Tier_1_Ratio + nim + equity_ratio +
+    gdp_growth_pct + interest_rate_pct +
+    GDP_per_Capita_PPP + unemployment_rate_pct
+  | fiscal_year,
+  data = df_eu_boot_full, cluster = ~Country_Region)
+
+eu_boot_h1_bank_fit <- feols(
+  Deposit_Ratio ~ pop65_pct +
+    Bismarckian + Beveridgean +
+    log_assets + Tier_1_Ratio + nim + equity_ratio +
+    gdp_growth_pct + interest_rate_pct +
+    GDP_per_Capita_PPP + unemployment_rate_pct
+  | fiscal_year,
+  data = df_eu_boot_bank, cluster = ~Country_Region)
+
+eu_boot_h1_market_fit <- feols(
+  Deposit_Ratio ~ pop65_pct +
+    Bismarckian + Beveridgean +
+    log_assets + Tier_1_Ratio + nim + equity_ratio +
+    gdp_growth_pct + interest_rate_pct +
+    GDP_per_Capita_PPP + unemployment_rate_pct
+  | fiscal_year,
+  data = df_eu_boot_market, cluster = ~Country_Region)
+
+eu_boot_h2_bank_fit <- feols(
+  Deposit_Ratio ~ pop65_pct * FinStructure +
+    Bismarckian + Beveridgean +
+    log_assets + Tier_1_Ratio + nim + equity_ratio +
+    gdp_growth_pct + interest_rate_pct +
+    GDP_per_Capita_PPP + unemployment_rate_pct
+  | fiscal_year,
+  data = df_eu_boot_bank, cluster = ~Country_Region)
+
+eu_boot_h2_market_fit <- feols(
+  Deposit_Ratio ~ pop65_pct * FinStructure +
+    Bismarckian + Beveridgean +
+    log_assets + Tier_1_Ratio + nim + equity_ratio +
+    gdp_growth_pct + interest_rate_pct +
+    GDP_per_Capita_PPP + unemployment_rate_pct
+  | fiscal_year,
+  data = df_eu_boot_market, cluster = ~Country_Region)
+
+eu_boot_h3_bank_fit <- feols(
+  Deposit_Ratio ~ Share_85plus +
+    Bismarckian + Beveridgean +
+    log_assets + Tier_1_Ratio + nim + equity_ratio +
+    gdp_growth_pct + interest_rate_pct +
+    GDP_per_Capita_PPP + unemployment_rate_pct
+  | fiscal_year,
+  data = df_eu_boot_bank, cluster = ~Country_Region)
+
+eu_boot_h3_market_fit <- feols(
+  Deposit_Ratio ~ Share_85plus +
+    Bismarckian + Beveridgean +
+    log_assets + Tier_1_Ratio + nim + equity_ratio +
+    gdp_growth_pct + interest_rate_pct +
+    GDP_per_Capita_PPP + unemployment_rate_pct
+  | fiscal_year,
+  data = df_eu_boot_market, cluster = ~Country_Region)
+
+# Run bootstrap
+# EU Full sample bootstrap
+eu_boot_h1_full <- boottest(eu_boot_h1_full_fit, clustid = "Country_Region", param = "pop65_pct", B = B)
+summary(eu_boot_h1_full)
+
+eu_boot_h2_full_pop65    <- boottest(eu_boot_h2_full_fit, clustid = "Country_Region", param = "pop65_pct",             B = B)
+eu_boot_h2_full_fin      <- boottest(eu_boot_h2_full_fit, clustid = "Country_Region", param = "FinStructure",           B = B)
+eu_boot_h2_full_interact <- boottest(eu_boot_h2_full_fit, clustid = "Country_Region", param = "pop65_pct:FinStructure", B = B)
+summary(eu_boot_h2_full_pop65)
+summary(eu_boot_h2_full_fin)
+summary(eu_boot_h2_full_interact)
+
+eu_boot_h3_full <- boottest(eu_boot_h3_full_fit, clustid = "Country_Region", param = "Share_85plus", B = B)
+summary(eu_boot_h3_full)
+
+# Bank/Market splits
+eu_boot_h1_bank   <- boottest(eu_boot_h1_bank_fit,   clustid = "Country_Region", param = "pop65_pct", B = B)
+eu_boot_h1_market <- boottest(eu_boot_h1_market_fit,  clustid = "Country_Region", param = "pop65_pct", B = B)
+
+summary(eu_boot_h1_bank)
+summary(eu_boot_h1_market)
+plot(eu_boot_h1_bank)
+plot(eu_boot_h1_market)
+
+eu_boot_h2_bank_pop65    <- boottest(eu_boot_h2_bank_fit,   clustid = "Country_Region", param = "pop65_pct",             B = B)
+eu_boot_h2_bank_fin      <- boottest(eu_boot_h2_bank_fit,   clustid = "Country_Region", param = "FinStructure",           B = B)
+eu_boot_h2_bank_interact <- boottest(eu_boot_h2_bank_fit,   clustid = "Country_Region", param = "pop65_pct:FinStructure", B = B)
+
+eu_boot_h2_market_pop65    <- boottest(eu_boot_h2_market_fit, clustid = "Country_Region", param = "pop65_pct",             B = B)
+eu_boot_h2_market_fin      <- boottest(eu_boot_h2_market_fit, clustid = "Country_Region", param = "FinStructure",           B = B)
+eu_boot_h2_market_interact <- boottest(eu_boot_h2_market_fit, clustid = "Country_Region", param = "pop65_pct:FinStructure", B = B)
+
+summary(eu_boot_h2_bank_pop65)
+summary(eu_boot_h2_bank_fin)
+summary(eu_boot_h2_bank_interact)
+summary(eu_boot_h2_market_pop65)
+summary(eu_boot_h2_market_fin)
+summary(eu_boot_h2_market_interact)
+plot(eu_boot_h2_bank_interact)
+plot(eu_boot_h2_market_interact)
+
+eu_boot_h3_bank   <- boottest(eu_boot_h3_bank_fit,   clustid = "Country_Region", param = "Share_85plus", B = B)
+eu_boot_h3_market <- boottest(eu_boot_h3_market_fit,  clustid = "Country_Region", param = "Share_85plus", B = B)
+
+summary(eu_boot_h3_bank)
+summary(eu_boot_h3_market)
+plot(eu_boot_h3_bank)
+plot(eu_boot_h3_market)
+
+
+#--------Step 11: Europe-Only — Stargazer LaTeX Regression Overview------------
+# stargazer requires lm/glm objects — refit full specs with lm() + year dummies
+
+# EU Full sample
+lm_eu_h1_full <- lm(Deposit_Ratio ~ pop65_pct +
+                       Bismarckian + Beveridgean +
+                       log_assets + Tier_1_Ratio + nim + equity_ratio +
+                       gdp_growth_pct + interest_rate_pct +
+                       GDP_per_Capita_PPP + unemployment_rate_pct +
+                       as.factor(fiscal_year),
+                     data = df_eu)
+
+lm_eu_h2_full <- lm(Deposit_Ratio ~ pop65_pct * FinStructure +
+                       Bismarckian + Beveridgean +
+                       log_assets + Tier_1_Ratio + nim + equity_ratio +
+                       gdp_growth_pct + interest_rate_pct +
+                       GDP_per_Capita_PPP + unemployment_rate_pct +
+                       as.factor(fiscal_year),
+                     data = df_eu)
+
+lm_eu_h3_full <- lm(Deposit_Ratio ~ Share_85plus +
+                       Bismarckian + Beveridgean +
+                       log_assets + Tier_1_Ratio + nim + equity_ratio +
+                       gdp_growth_pct + interest_rate_pct +
+                       GDP_per_Capita_PPP + unemployment_rate_pct +
+                       as.factor(fiscal_year),
+                     data = df_eu)
+
+# EU Bank-based split
+lm_eu_h1_bb <- lm(Deposit_Ratio ~ pop65_pct +
+                     Bismarckian + Beveridgean +
+                     log_assets + Tier_1_Ratio + nim + equity_ratio +
+                     gdp_growth_pct + interest_rate_pct +
+                     GDP_per_Capita_PPP + unemployment_rate_pct +
+                     as.factor(fiscal_year),
+                   data = df_eu_bank)
+
+lm_eu_h2_bb <- lm(Deposit_Ratio ~ pop65_pct * FinStructure +
+                     Bismarckian + Beveridgean +
+                     log_assets + Tier_1_Ratio + nim + equity_ratio +
+                     gdp_growth_pct + interest_rate_pct +
+                     GDP_per_Capita_PPP + unemployment_rate_pct +
+                     as.factor(fiscal_year),
+                   data = df_eu_bank)
+
+lm_eu_h3_bb <- lm(Deposit_Ratio ~ Share_85plus +
+                     Bismarckian + Beveridgean +
+                     log_assets + Tier_1_Ratio + nim + equity_ratio +
+                     gdp_growth_pct + interest_rate_pct +
+                     GDP_per_Capita_PPP + unemployment_rate_pct +
+                     as.factor(fiscal_year),
+                   data = df_eu_bank)
+
+# EU Market-based split
+lm_eu_h1_mb <- lm(Deposit_Ratio ~ pop65_pct +
+                     Bismarckian + Beveridgean +
+                     log_assets + Tier_1_Ratio + nim + equity_ratio +
+                     gdp_growth_pct + interest_rate_pct +
+                     GDP_per_Capita_PPP + unemployment_rate_pct +
+                     as.factor(fiscal_year),
+                   data = df_eu_market)
+
+lm_eu_h2_mb <- lm(Deposit_Ratio ~ pop65_pct * FinStructure +
+                     Bismarckian + Beveridgean +
+                     log_assets + Tier_1_Ratio + nim + equity_ratio +
+                     gdp_growth_pct + interest_rate_pct +
+                     GDP_per_Capita_PPP + unemployment_rate_pct +
+                     as.factor(fiscal_year),
+                   data = df_eu_market)
+
+lm_eu_h3_mb <- lm(Deposit_Ratio ~ Share_85plus +
+                     Bismarckian + Beveridgean +
+                     log_assets + Tier_1_Ratio + nim + equity_ratio +
+                     gdp_growth_pct + interest_rate_pct +
+                     GDP_per_Capita_PPP + unemployment_rate_pct +
+                     as.factor(fiscal_year),
+                   data = df_eu_market)
+
+# H1 EU overview: Full | Bank-based | Market-based
+stargazer(lm_eu_h1_full, lm_eu_h1_bb, lm_eu_h1_mb,
+          type  = "latex",
+          title = "H1: Demographic Ageing and Deposit Ratios --- Europe Only, Split by Financial System",
+          dep.var.labels   = "Deposit Ratio",
+          column.labels    = c("EU Full", "EU Bank-based", "EU Market-based"),
+          covariate.labels = c("Population 65+\\%",
+                               "Bismarckian", "Beveridgean",
+                               "Log(Assets)", "Tier 1 Ratio", "NIM", "Equity Ratio",
+                               "GDP Growth\\%", "Interest Rate\\%",
+                               "GDP per Capita PPP", "Unemployment\\%"),
+          keep             = c("pop65_pct", "Bismarckian", "Beveridgean",
+                               "log_assets", "Tier_1_Ratio", "nim", "equity_ratio",
+                               "gdp_growth_pct", "interest_rate_pct",
+                               "GDP_per_Capita_PPP", "unemployment_rate_pct"),
+          omit.stat        = c("f", "ser"),
+          add.lines        = list(
+            c("Year FE", "Yes", "Yes", "Yes"),
+            c("Clustering", "Country-Region", "Country-Region", "Country-Region"),
+            c("Boot p (Pop 65+\\%)",
+              format_boot_p(eu_boot_h1_full$p_val),
+              format_boot_p(eu_boot_h1_bank$p_val),
+              format_boot_p(eu_boot_h1_market$p_val))
+          ),
+          notes            = "Europe only (EU27 + CH + UK). Country-region-clustered SEs. Bootstrap p-values (Rademacher, 9,999 iter.).",
+          notes.append     = FALSE,
+          no.space         = TRUE)
+
+# H2 EU overview: Full | Bank-based | Market-based
+stargazer(lm_eu_h2_full, lm_eu_h2_bb, lm_eu_h2_mb,
+          type  = "latex",
+          title = "H2: Financial Structure Moderation --- Europe Only, Split by Financial System",
+          dep.var.labels   = "Deposit Ratio",
+          column.labels    = c("EU Full", "EU Bank-based", "EU Market-based"),
+          covariate.labels = c("Population 65+\\%", "Financial Structure",
+                               "Bismarckian", "Beveridgean",
+                               "Log(Assets)", "Tier 1 Ratio", "NIM", "Equity Ratio",
+                               "GDP Growth\\%", "Interest Rate\\%",
+                               "GDP per Capita PPP", "Unemployment\\%",
+                               "Pop 65+\\% $\\times$ Fin.\\ Structure"),
+          keep             = c("pop65_pct", "FinStructure",
+                               "Bismarckian", "Beveridgean",
+                               "log_assets", "Tier_1_Ratio", "nim", "equity_ratio",
+                               "gdp_growth_pct", "interest_rate_pct",
+                               "GDP_per_Capita_PPP", "unemployment_rate_pct",
+                               "pop65_pct:FinStructure"),
+          omit.stat        = c("f", "ser"),
+          add.lines        = list(
+            c("Year FE", "Yes", "Yes", "Yes"),
+            c("Clustering", "Country-Region", "Country-Region", "Country-Region"),
+            c("Boot p (Pop 65+\\%)",
+              format_boot_p(eu_boot_h2_full_pop65$p_val),
+              format_boot_p(eu_boot_h2_bank_pop65$p_val),
+              format_boot_p(eu_boot_h2_market_pop65$p_val)),
+            c("Boot p (FinStructure)",
+              format_boot_p(eu_boot_h2_full_fin$p_val),
+              format_boot_p(eu_boot_h2_bank_fin$p_val),
+              format_boot_p(eu_boot_h2_market_fin$p_val)),
+            c("Boot p (Pop65$\\times$FinStr)",
+              format_boot_p(eu_boot_h2_full_interact$p_val),
+              format_boot_p(eu_boot_h2_bank_interact$p_val),
+              format_boot_p(eu_boot_h2_market_interact$p_val))
+          ),
+          notes            = "Europe only (EU27 + CH + UK). Country-region-clustered SEs. Bootstrap p-values (Rademacher, 9,999 iter.).",
+          notes.append     = FALSE,
+          no.space         = TRUE)
+
+# H3 EU overview: Full | Bank-based | Market-based
+stargazer(lm_eu_h3_full, lm_eu_h3_bb, lm_eu_h3_mb,
+          type  = "latex",
+          title = "H3: The Distinct Effect of the Oldest --- Europe Only, Split by Financial System",
+          dep.var.labels   = "Deposit Ratio",
+          column.labels    = c("EU Full", "EU Bank-based", "EU Market-based"),
+          covariate.labels = c("Population 85+\\%",
+                               "Bismarckian", "Beveridgean",
+                               "Log(Assets)", "Tier 1 Ratio", "NIM", "Equity Ratio",
+                               "GDP Growth\\%", "Interest Rate\\%",
+                               "GDP per Capita PPP", "Unemployment\\%"),
+          keep             = c("Share_85plus", "Bismarckian", "Beveridgean",
+                               "log_assets", "Tier_1_Ratio", "nim", "equity_ratio",
+                               "gdp_growth_pct", "interest_rate_pct",
+                               "GDP_per_Capita_PPP", "unemployment_rate_pct"),
+          omit.stat        = c("f", "ser"),
+          add.lines        = list(
+            c("Year FE", "Yes", "Yes", "Yes"),
+            c("Clustering", "Country-Region", "Country-Region", "Country-Region"),
+            c("Boot p (Pop 85+\\%)",
+              format_boot_p(eu_boot_h3_full$p_val),
+              format_boot_p(eu_boot_h3_bank$p_val),
+              format_boot_p(eu_boot_h3_market$p_val))
+          ),
+          notes            = "Europe only (EU27 + CH + UK). Country-region-clustered SEs. Bootstrap p-values (Rademacher, 9,999 iter.).",
+          notes.append     = FALSE,
+          no.space         = TRUE)
