@@ -27,6 +27,10 @@ finstruc <- read.csv("(OPEN) To be merged/fin_structure_OECD_patched.csv",
                       stringsAsFactors = FALSE)
 macro    <- read.csv("(OPEN) To be merged/macro_panel_vf.csv",
                       stringsAsFactors = FALSE)
+gdp_ppp  <- read.csv("Macro Controls/GDP_per_Capita_PPP.csv",
+                      stringsAsFactors = FALSE)
+demog85  <- read.csv("Macro Controls/demographics_85_2010_2025.csv",
+                      stringsAsFactors = FALSE)
 
 #------------------------------------------------------------#
 # Prepare join keys
@@ -49,6 +53,14 @@ finstruc$SP_COUNTRY_NAME <- ifelse(finstruc$SP_COUNTRY_NAME == "Turkey",
 
 macro$Country <- ifelse(macro$Country == "United States", "USA", macro$Country)
 macro$Country <- ifelse(macro$Country == "Turkey", "Türkiye", macro$Country)
+
+# GDP per Capita PPP
+gdp_ppp$Country <- ifelse(gdp_ppp$Country == "United States", "USA", gdp_ppp$Country)
+gdp_ppp$Country <- ifelse(gdp_ppp$Country == "Turkiye",       "Türkiye", gdp_ppp$Country)
+gdp_ppp$Country <- ifelse(gdp_ppp$Country == "Korea, Rep.",   "South Korea", gdp_ppp$Country)
+gdp_ppp$Country <- ifelse(gdp_ppp$Country == "Slovak Republic", "Slovakia", gdp_ppp$Country)
+
+# Demographics 85+ (already uses USA, Türkiye, South Korea, Slovakia – no changes needed)
 
 #------------------------------------------------------------#
 # Merge function
@@ -74,6 +86,22 @@ merge_macro <- function(df) {
                         "gdp_per_capita_usd", "gdp_growth_pct",
                         "unemployment_rate_pct", "interest_rate_pct",
                         "pension_assets_pct_gdp")],
+              by.x = c("SP_COUNTRY_NAME", "year"),
+              by.y = c("Country", "Year"),
+              all.x = TRUE)
+
+  # 3) GDP per Capita PPP (join on country + year)
+  #    Columns: GDP_per_Capita_PPP
+  df <- merge(df,
+              gdp_ppp[, c("Country", "Year", "GDP_per_Capita_PPP")],
+              by.x = c("SP_COUNTRY_NAME", "year"),
+              by.y = c("Country", "Year"),
+              all.x = TRUE)
+
+  # 4) Demographics 85+ (join on country + year)
+  #    Columns: Share_85plus
+  df <- merge(df,
+              demog85[, c("Country", "Year", "Share_85plus")],
               by.x = c("SP_COUNTRY_NAME", "year"),
               by.y = c("Country", "Year"),
               all.x = TRUE)
@@ -104,7 +132,8 @@ master_sav$Deposit_Ratio <- master_sav$var_273760 / master_sav$var_329639
 
 new_cols <- c("mktcap_pct_gdp", "pvcredit_pct_gdp", "FinStructure", "pop65_pct",
               "gdp_per_capita_usd", "gdp_growth_pct", "unemployment_rate_pct",
-              "interest_rate_pct", "pension_assets_pct_gdp")
+              "interest_rate_pct", "pension_assets_pct_gdp",
+              "GDP_per_Capita_PPP", "Share_85plus")
 
 cat("\n--- NA counts (ALL) ---\n")
 print(colSums(is.na(master_all[, new_cols])))
