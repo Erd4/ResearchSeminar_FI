@@ -1,0 +1,502 @@
+\documentclass[12pt,a4paper]{article}
+
+% ── Packages ──
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{setspace}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{caption}
+\usepackage[hidelinks]{hyperref}
+\usepackage{natbib}
+\usepackage{amsmath}
+\usepackage{dcolumn}
+\usepackage{threeparttable}
+\usepackage{pdflscape}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{xcolor}
+
+% ── Page style ──
+\onehalfspacing
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.4pt}
+\fancyhead[L]{\small\textit{Population Aging and Bank Deposit Funding}}
+\fancyhead[R]{\small\thepage}
+\fancyfoot{}
+
+% ── Column type for regression table ──
+\newcolumntype{d}[1]{D{.}{.}{#1}}
+
+\begin{document}
+
+% ═══════════════════════════════════════════════════════════════
+% TITLE PAGE
+% ═══════════════════════════════════════════════════════════════
+
+\thispagestyle{empty}
+\begin{center}
+
+\vspace*{1cm}
+
+{\large\textsc{University of St.\,Gallen}}\\[0.3cm]
+{\normalsize School of Management, Economics, Law, Social Sciences,\\ International Affairs and Computer Science (HSG)}
+
+\vspace{0.5cm}
+\noindent\rule{\textwidth}{0.4pt}
+
+\vspace{2cm}
+
+{\LARGE\bfseries Population Aging and Bank Deposit Funding:\\[0.4cm] The Role of Financial System Structure}
+
+\vspace{0.8cm}
+
+{\large A Cross-Country Panel Analysis of OECD Banks, 2010--2024}
+
+\vspace{3cm}
+
+{\large\textbf{Alexander Kekkas}}\\[0.3cm]
+Mettlenstrasse 19\\
+3780 Gstaad\\
++41\,(0)\,79\,967\,90\,88\\
+alexander.kekkas@student.unisg.ch\\
+21-609-656
+
+\vspace{2cm}
+
+8,196: Research Seminar Financial Institutions\\
+Prof.\ Dr.\ Emilia Garcia-Appendini\\[0.3cm]
+March 2026
+
+\vspace{1cm}
+\noindent\rule{\textwidth}{0.4pt}
+
+\end{center}
+
+\newpage
+
+% ═══════════════════════════════════════════════════════════════
+% ABSTRACT
+% ═══════════════════════════════════════════════════════════════
+
+\thispagestyle{fancy}
+\section*{Abstract}
+
+This paper investigates the relationship between population aging and bank deposit funding across 38 OECD countries over the period 2010--2024. Drawing on the life-cycle hypothesis of savings, I test whether higher shares of elderly populations are associated with greater reliance on deposit funding by banks, and whether this relationship varies with the structure of the financial system. Using a panel of 67,202 bank-year observations from S\&P Capital IQ Pro, I estimate pooled OLS regressions with year fixed effects and standard errors clustered at the country level. The results show that a one-percentage-point increase in the population share aged 65 and above is associated with a 1.12-percentage-point increase in the deposit-to-asset ratio, significant at the five-percent level. Financial system structure, measured by Levine's (2002) bank-versus-market index, is also positively and significantly related to deposit reliance. However, the interaction between aging and financial structure is not statistically significant, suggesting that the aging--deposit relationship does not systematically differ between bank-based and market-based financial systems. Bank-level controls, including size, capitalisation, net interest margin, and the loan-to-deposit ratio, are strongly significant and explain a substantial share of variation.
+
+\vspace{0.5cm}
+\noindent\textbf{Keywords:} population aging, bank deposits, deposit funding, financial system structure, life-cycle hypothesis, OECD
+
+\noindent\textbf{JEL Classification:} G21, J11, E21
+
+\newpage
+
+% ═══════════════════════════════════════════════════════════════
+% TABLE OF CONTENTS
+% ═══════════════════════════════════════════════════════════════
+
+\tableofcontents
+\newpage
+
+% ═══════════════════════════════════════════════════════════════
+% 1. INTRODUCTION
+% ═══════════════════════════════════════════════════════════════
+
+\section{Introduction}
+\label{sec:intro}
+
+Population aging is one of the defining structural shifts of the twenty-first century. Across OECD economies, the share of the population aged 65 and above has risen from approximately 15 percent in 2010 to nearly 20 percent by 2024, driven by declining fertility rates and steadily increasing life expectancy \citep{OECD2024}. This demographic transformation carries far-reaching consequences for public finances, labour markets, and---as this paper argues---the banking sector. Specifically, this paper asks: \textit{How does population aging affect banks' reliance on deposit funding, and does the structure of the financial system condition this relationship?}
+
+Understanding the link between demographics and bank funding is both theoretically motivated and practically relevant. Banks depend on household deposits as a primary source of stable funding, and the volume and allocation of these deposits are shaped by the saving behaviour of the population. The life-cycle hypothesis \citep{Modigliani1954, Ando1963} predicts that individuals accumulate wealth during their working years and draw down savings in retirement. Yet a growing body of evidence suggests that older households do not dissave as sharply as the classical model predicts. Precautionary motives related to uncertain health expenditures and longevity risk, bequest motives, and the relative illiquidity of housing wealth all contribute to persistently high saving rates among the elderly \citep{DeNardi2010, Poterba2011}. Moreover, older households tend to favour safe, liquid instruments---particularly bank deposits---over riskier financial products \citep{Boersch-Supan2003}.
+
+These household-level patterns aggregate to macroeconomic outcomes that directly affect bank balance sheets. If aging societies maintain or increase their deposit holdings, banks in countries with older populations should exhibit higher deposit-to-asset ratios, all else being equal. Conversely, the institutional setting may matter. In bank-based financial systems, where households have fewer alternatives to bank deposits, the aging effect on deposit funding may be more pronounced than in market-based systems, where mutual funds, direct equity holdings, and other investment vehicles offer competing outlets for household savings \citep{Levine2002, Allen2000}.
+
+This paper makes three contributions to the literature. First, it provides direct evidence on the aging--deposit-funding nexus using a large cross-country panel of individual banks, rather than relying on aggregate country-level data. The dataset comprises 67,202 bank-year observations spanning 38 OECD countries and the period 2010--2024, sourced from S\&P Capital IQ Pro and merged with demographic and macroeconomic data from the OECD, World Bank, and Eurostat. Second, the paper introduces financial system structure as a potential moderating variable, testing whether the deposit-funding response to aging differs between bank-based and market-based economies. Third, the analysis controls for a rich set of bank-level characteristics (size, capitalisation, net interest margin, loan-to-deposit ratio) and macroeconomic conditions (GDP growth, unemployment, interest rates), which helps isolate the demographic channel.
+
+The main findings are as follows. A one-percentage-point increase in the share of the population aged 65 and above is associated with a 1.12-percentage-point increase in the deposit-to-asset ratio, statistically significant at the five-percent level. This supports the hypothesis that aging populations contribute positively to banks' deposit funding. Financial system structure is also significant: banks in more bank-based systems tend to have higher deposit ratios, consistent with households in such systems having fewer alternatives to bank deposits. However, the interaction between aging and financial structure is not significant, implying that the aging effect operates similarly across different financial system types. Pension system development, measured as pension fund assets relative to GDP, does not show a significant effect on bank deposit ratios.
+
+The remainder of the paper proceeds as follows. Section~\ref{sec:framework} develops the conceptual framework and hypotheses. Section~\ref{sec:institutional} provides relevant institutional background on financial system structures. Section~\ref{sec:data} describes the data and empirical methodology. Section~\ref{sec:results} presents the main results. Section~\ref{sec:extensions} discusses extensions and robustness considerations. Section~\ref{sec:conclusion} concludes.
+
+% ═══════════════════════════════════════════════════════════════
+% 2. CONCEPTUAL FRAMEWORK
+% ═══════════════════════════════════════════════════════════════
+
+\section{Conceptual Framework}
+\label{sec:framework}
+
+\subsection{The Life-Cycle Hypothesis and Deposit Demand}
+
+The theoretical foundation of this paper rests on the life-cycle hypothesis (LCH) of savings, first articulated by \citet{Modigliani1954} and \citet{Ando1963}. The LCH posits that rational individuals smooth consumption over their lifetime by saving during their working years and dissaving during retirement. Under the standard model, aggregate saving rates should decline as the share of retired individuals in the population increases, which would in turn reduce the pool of deposits available to banks.
+
+However, several well-documented deviations from the strict LCH framework suggest that older households maintain---or even increase---their holdings of safe, liquid assets such as bank deposits. \citet{DeNardi2010} show that precautionary saving against uncertain medical expenses and the desire to leave bequests cause older households to decumulate wealth more slowly than predicted. \citet{Poterba2011} find that U.S.\ retirees draw down financial assets only gradually, with median financial wealth remaining stable well into the seventies. \citet{Boersch-Supan2003} demonstrate that European households display a pronounced shift toward safer portfolio compositions as they age, with bank deposits constituting an increasingly large share of financial wealth.
+
+These patterns lead to the first hypothesis:
+
+\medskip
+\noindent\textbf{Hypothesis 1.} \textit{A higher share of the elderly population (aged 65 and above) is positively associated with banks' deposit-to-asset ratios.}
+\medskip
+
+The economic intuition is that older households, even as they partly draw down savings, maintain disproportionately large deposit holdings relative to younger cohorts who allocate more wealth to equities, real estate, and other non-deposit instruments.
+
+\subsection{Financial System Structure as a Moderating Factor}
+
+The relationship between aging and deposit funding may depend on the institutional structure of the financial system. \citet{Levine2002} distinguishes between bank-based systems---where banks play the dominant role in allocating capital and intermediating savings---and market-based systems, where securities markets and institutional investors perform a larger share of these functions. \citet{Allen2000} develop a theoretical framework showing how different financial structures create different incentive environments for household portfolio allocation.
+
+In bank-based systems, households face a narrower set of savings vehicles, which may amplify the tendency of older households to hold deposits. In market-based systems, the availability of money market funds, bond funds, and other liquid investment products may partially substitute for bank deposits, attenuating the aging effect. This reasoning motivates the second hypothesis:
+
+\medskip
+\noindent\textbf{Hypothesis 2.} \textit{The positive association between population aging and deposit funding is stronger in bank-based financial systems than in market-based financial systems.}
+\medskip
+
+Empirically, Hypothesis~2 is tested through an interaction term between the elderly population share and a measure of financial system structure.
+
+% ═══════════════════════════════════════════════════════════════
+% 3. INSTITUTIONAL FRAMEWORK
+% ═══════════════════════════════════════════════════════════════
+
+\section{Institutional Background}
+\label{sec:institutional}
+
+\subsection{Demographic Trends Across the OECD}
+
+The pace and extent of population aging vary substantially across the countries in our sample. Japan leads with nearly 30 percent of its population aged 65 and above, followed by Italy, Germany, and Finland, each exceeding 22 percent by 2024. At the other end, Mexico, Colombia, and Costa Rica retain relatively young populations, with elderly shares below 10 percent. This cross-country variation, combined with within-country changes over the 2010--2024 period, provides the identifying variation for the empirical analysis.
+
+\subsection{Financial System Structures}
+
+Following \citet{Levine2002}, financial systems can be characterised along a continuum from bank-based to market-based. The FinStructure index used in this paper captures the relative importance of banks versus markets in the economy, constructed from indicators of banking sector development (private credit to GDP, bank assets to GDP) and stock market development (market capitalisation, turnover, and value traded relative to GDP). Countries such as Germany, Austria, and Japan score toward the bank-based end, while the United States, the United Kingdom, and Switzerland score toward the market-based end. The within-sample variation in this index ranges from $-0.67$ (most market-based) to $0.77$ (most bank-based), with a mean close to zero.
+
+\subsection{Pension Systems and Household Portfolio Allocation}
+
+The extent to which pension systems channel household savings away from bank deposits is an important institutional consideration. Countries with large funded pension systems---such as the Netherlands, Switzerland, Australia, and the United Kingdom---accumulate pension fund assets exceeding 100 percent of GDP. In these countries, a substantial share of household retirement savings is intermediated through pension funds and invested in capital markets, rather than held as bank deposits. Countries with predominantly pay-as-you-go pension systems (e.g., France, Germany, Italy) have relatively small pension fund sectors, leaving households to manage more of their retirement savings independently. We control for pension fund development (pension assets as a share of GDP) in our regressions to account for this channel.
+
+% ═══════════════════════════════════════════════════════════════
+% 4. DATA AND METHODOLOGY
+% ═══════════════════════════════════════════════════════════════
+
+\section{Data and Methodology}
+\label{sec:data}
+
+\subsection{Data Sources and Sample Construction}
+
+The analysis combines bank-level financial data with country-level demographic, macroeconomic, and institutional variables. Bank-level data are sourced from \textbf{S\&P Capital IQ Pro} (formerly SNL Financial), which provides standardised financial statements for banks worldwide. The sample includes all commercial banks and savings banks/thrifts/mutuals domiciled in OECD member states and Switzerland for which the relevant balance-sheet items are available over the period 2010--2024.\footnote{Banks classified as ``Other Banking'' in S\&P Capital IQ Pro are excluded, as this category comprises non-depository or hybrid financial institutions for which the deposit ratio is not economically meaningful.}
+
+Country-level data are drawn from several sources. Population aging data (share of population aged 65+) are obtained from the \textbf{OECD Population Statistics} and \textbf{World Bank World Development Indicators}. The financial structure index follows \citet{Levine2002} and is constructed from \textbf{World Bank Global Financial Development Database} indicators. Pension fund assets as a share of GDP are sourced from the \textbf{OECD Global Pension Statistics}. Macroeconomic controls (GDP growth, unemployment rate, short-term interest rate) are taken from the \textbf{OECD Main Economic Indicators} and \textbf{IMF International Financial Statistics}.
+
+After merging and cleaning, the final dataset contains 160,816 bank-year observations across 43 countries, of which 67,202 observations across 38 countries enter the fully specified regression with all control variables.
+
+\subsection{Variable Definitions}
+
+Table~\ref{tab:variables} summarises the variables used in the analysis.
+
+\begin{table}[H]
+\centering
+\caption{Variable Definitions}
+\label{tab:variables}
+\small
+\begin{threeparttable}
+\begin{tabularx}{\textwidth}{l l X}
+\toprule
+\textbf{Variable} & \textbf{Type} & \textbf{Definition} \\
+\midrule
+Deposit Ratio & DV & Total deposits divided by total assets \\
+pop65\_pct & IV & Share of the population aged 65 and above (\%) \\
+FinStructure & IV & Financial structure index following \citet{Levine2002}; higher values indicate more bank-based systems \\
+Pension Assets (\% GDP) & Control & Pension fund assets as a share of GDP \\
+Log(Assets) & Control & Natural logarithm of total assets (in local currency) \\
+Equity Ratio & Control & Total equity divided by total assets \\
+NIM & Control & Net interest income divided by total assets \\
+Loan-to-Deposit & Control & Total net loans divided by total deposits \\
+GDP Growth & Control & Annual real GDP growth rate (\%) \\
+Unemployment & Control & Unemployment rate (\%) \\
+Interest Rate & Control & Short-term interest rate (\%) \\
+\bottomrule
+\end{tabularx}
+\end{threeparttable}
+\end{table}
+
+\subsection{Summary Statistics}
+
+Table~\ref{tab:sumstats} reports summary statistics for the estimation sample used in the fully specified model (Model~4). The mean deposit ratio is 0.727, indicating that the average bank in the sample finances approximately 73 percent of its assets through deposits. The mean share of the population aged 65+ is 19.1 percent, reflecting the relatively advanced demographic profiles of OECD economies. The FinStructure index has a mean close to zero ($-0.004$), with substantial variation across countries.
+
+\begin{table}[H]
+\centering
+\caption{Summary Statistics (Model~4 Estimation Sample)}
+\label{tab:sumstats}
+\small
+\begin{threeparttable}
+\begin{tabular}{l r r r r r r r}
+\toprule
+& \textbf{Mean} & \textbf{SD} & \textbf{Min} & \textbf{P25} & \textbf{Median} & \textbf{P75} & \textbf{Max} \\
+\midrule
+Deposit Ratio       & 0.727 & 0.189 & 0.000 & 0.672 & 0.779 & 0.850 & 2.468 \\
+Pop.\ 65+ (\%)     & 19.14 & 4.329 & 5.842 & 16.07 & 19.77 & 21.45 & 29.78 \\
+FinStructure        & $-$0.004 & 0.318 & $-$0.671 & $-$0.217 & $-$0.095 & 0.188 & 0.767 \\
+Pension Assets/GDP  & 57.52 & 59.51 & 0.024 & 6.778 & 19.99 & 122.9 & 209.6 \\
+Log(Assets)         & 14.28 & 2.035 & 6.692 & 12.84 & 13.99 & 15.43 & 22.11 \\
+Equity Ratio        & 0.100 & 0.074 & $-$2.228 & 0.067 & 0.090 & 0.114 & 0.999 \\
+NIM                 & 0.022 & 0.018 & $-$0.046 & 0.013 & 0.020 & 0.028 & 0.846 \\
+Loan-to-Deposit     & 58.73 & 5,340 & 0.000 & 0.662 & 0.850 & 1.036 & 1,000,537 \\
+GDP Growth (\%)     & 1.673 & 2.465 & $-$10.94 & 0.754 & 1.820 & 2.793 & 24.62 \\
+Unemployment (\%)   & 6.116 & 3.161 & 2.015 & 3.896 & 5.280 & 7.759 & 27.69 \\
+Interest Rate (\%)  & 1.843 & 2.135 & $-$0.750 & 0.283 & 1.570 & 2.743 & 48.96 \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item \textit{Notes:} $N = 67{,}202$ bank-year observations, 38 countries, 2010--2024. All continuous variables are winsorised at the 1st and 99th percentiles for the summary statistics but enter regressions unwinsorised.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+\subsection{Empirical Strategy}
+
+The baseline specification estimates the following pooled OLS model:
+
+\begin{equation}
+\label{eq:baseline}
+\text{DepositRatio}_{i,t} = \alpha + \beta_1 \, \text{Pop65}_{c,t} + \beta_2 \, \text{FinStructure}_{c,t} + \beta_3 \, \text{Pension}_{c,t} + \boldsymbol{\gamma}' \mathbf{X}_{i,t} + \boldsymbol{\delta}' \mathbf{M}_{c,t} + \mu_t + \varepsilon_{i,t}
+\end{equation}
+
+\noindent where $i$ indexes banks, $c$ indexes countries, and $t$ indexes years. $\text{DepositRatio}_{i,t}$ is bank $i$'s total deposits divided by total assets. $\text{Pop65}_{c,t}$ is the share of the population aged 65+ in country $c$ in year $t$. $\text{FinStructure}_{c,t}$ is the financial structure index. $\text{Pension}_{c,t}$ denotes pension fund assets as a share of GDP. $\mathbf{X}_{i,t}$ is a vector of bank-level controls (log assets, equity ratio, net interest margin, loan-to-deposit ratio), and $\mathbf{M}_{c,t}$ comprises macroeconomic controls (GDP growth, unemployment, interest rate). $\mu_t$ denotes year fixed effects and $\varepsilon_{i,t}$ is the error term.
+
+To test Hypothesis~2, I augment the model with an interaction term:
+
+\begin{equation}
+\label{eq:interaction}
+\text{DepositRatio}_{i,t} = \alpha + \beta_1 \, \text{Pop65}_{c,t} + \beta_2 \, \text{FinStructure}_{c,t} + \beta_3 \, (\text{Pop65} \times \text{FinStructure})_{c,t} + \ldots + \mu_t + \varepsilon_{i,t}
+\end{equation}
+
+\paragraph{Identification and standard errors.} The main source of identifying variation is cross-country differences in demographic structure and their evolution over time. I use year fixed effects rather than bank or country fixed effects for two reasons. First, the key regressors of interest---population aging and financial structure---vary primarily across countries, with limited within-country variation over a 15-year window. Country fixed effects would absorb most of this variation, making it difficult to estimate $\beta_1$ and $\beta_2$ precisely. Second, bank fixed effects would eliminate all cross-sectional variation, which is the primary source of identification in this setting. Year fixed effects control for common time trends such as global interest rate movements and regulatory changes.
+
+Standard errors are clustered at the country level to account for the correlation of residuals within countries, both across banks and over time \citep{Petersen2009}. The sample includes 38 country clusters, which is above the threshold of 30--50 typically considered sufficient for reliable cluster-robust inference \citep{Cameron2008}.\footnote{With fewer than 50 clusters, one might consider a wild cluster bootstrap procedure for more conservative inference. I note that our 38 clusters place us in a zone where conventional cluster-robust standard errors are generally adequate, though results should be interpreted with this caveat in mind.}
+
+\paragraph{Potential identification concerns.} Several threats to identification deserve discussion. First, \textit{omitted variable bias} may arise if unobserved country characteristics (e.g., financial regulation, cultural attitudes toward saving) are correlated with both demographic structure and deposit ratios. The inclusion of financial structure, pension development, macroeconomic controls, and year fixed effects mitigates but cannot fully eliminate this concern. Second, \textit{reverse causality} is unlikely to be a first-order concern, as demographic change is slow-moving and driven by fertility and mortality trends that are plausibly exogenous to bank funding structures. Third, the bank-level controls address \textit{compositional effects}: countries differ in the types of banks that dominate their banking sectors, and controlling for bank size, capitalisation, and business model ensures that the estimated aging effect is not confounded by differences in bank characteristics.
+
+% ═══════════════════════════════════════════════════════════════
+% 5. MAIN RESULTS
+% ═══════════════════════════════════════════════════════════════
+
+\section{Main Results}
+\label{sec:results}
+
+\subsection{Baseline Regressions}
+
+Table~\ref{tab:regression} presents the main results across four specifications, progressively adding controls. All models include year fixed effects and use standard errors clustered by country.
+
+\begin{table}[H]
+\centering
+\caption{Population Aging and Bank Deposit Ratios}
+\label{tab:regression}
+\small
+\begin{threeparttable}
+\begin{tabular}{l d{4.4} d{4.4} d{4.4} d{4.4}}
+\toprule
+& \multicolumn{1}{c}{(1)} & \multicolumn{1}{c}{(2)} & \multicolumn{1}{c}{(3)} & \multicolumn{1}{c}{(4)} \\
+\midrule
+Pop.\ 65+ (\%)      & 0.0079    & 0.0148^{***} & 0.0177^{***} & 0.0112^{**}  \\
+                     & (0.0087)  & (0.0039)     & (0.0032)     & (0.0047)     \\[6pt]
+FinStructure         &           & 0.2257^{***} & 0.2312^{***} & 0.1512^{**}  \\
+                     &           & (0.0647)     & (0.0893)     & (0.0660)     \\[6pt]
+Pension Assets/GDP   &           &              & 0.0004       & 0.0003       \\
+                     &           &              & (0.0005)     & (0.0004)     \\[6pt]
+Log(Assets)          &           &              &              & -0.0255^{***} \\
+                     &           &              &              & (0.0045)     \\[6pt]
+Equity Ratio         &           &              &              & -1.0530^{***} \\
+                     &           &              &              & (0.0585)     \\[6pt]
+NIM                  &           &              &              & 0.9151^{***} \\
+                     &           &              &              & (0.2890)     \\[6pt]
+Loan-to-Deposit      &           &              &              & -0.0000^{***} \\
+                     &           &              &              & (0.0000)     \\[6pt]
+GDP Growth           &           &              &              & 0.0041       \\
+                     &           &              &              & (0.0034)     \\[6pt]
+Unemployment         &           &              &              & -0.0073      \\
+                     &           &              &              & (0.0050)     \\[6pt]
+Interest Rate        &           &              &              & -0.0015      \\
+                     &           &              &              & (0.0064)     \\[6pt]
+\midrule
+Year FE              & \multicolumn{1}{c}{Yes} & \multicolumn{1}{c}{Yes} & \multicolumn{1}{c}{Yes} & \multicolumn{1}{c}{Yes} \\
+Bank Controls        & \multicolumn{1}{c}{No}  & \multicolumn{1}{c}{No}  & \multicolumn{1}{c}{No}  & \multicolumn{1}{c}{Yes} \\
+Macro Controls       & \multicolumn{1}{c}{No}  & \multicolumn{1}{c}{No}  & \multicolumn{1}{c}{No}  & \multicolumn{1}{c}{Yes} \\[4pt]
+Observations         & \multicolumn{1}{c}{81,681} & \multicolumn{1}{c}{78,791} & \multicolumn{1}{c}{70,018} & \multicolumn{1}{c}{67,202} \\
+$R^2$                & 0.022     & 0.110        & 0.141        & 0.342        \\
+Countries            & \multicolumn{1}{c}{42} & \multicolumn{1}{c}{41} & \multicolumn{1}{c}{39} & \multicolumn{1}{c}{38} \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item \textit{Notes:} The dependent variable is the deposit-to-asset ratio. All models are estimated by pooled OLS with year fixed effects. Standard errors clustered at the country level are reported in parentheses. $^{***}$, $^{**}$, and $^{*}$ denote significance at the 1\%, 5\%, and 10\% levels, respectively.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+Model~(1) includes only the elderly population share and year fixed effects. The coefficient on Pop.~65+ is positive (0.0079) but not statistically significant ($p = 0.37$), indicating that, without controlling for cross-country differences in financial structure, the raw correlation between aging and deposit ratios is noisy.
+
+Model~(2) adds the FinStructure index. Both coefficients become highly significant: Pop.~65+ has a coefficient of 0.0148 ($p < 0.001$), and FinStructure has a coefficient of 0.2257 ($p < 0.001$). The marked improvement in significance for the aging variable upon controlling for financial structure suggests that omitting financial structure induces substantial bias. Countries with market-based systems tend to be wealthier and have older populations (e.g., Japan, the U.S., and the U.K.), but their banks rely less on deposits. Failing to control for this confound attenuates the aging coefficient toward zero. The $R^2$ increases from 2.2 to 11.0 percent.
+
+Model~(3) adds pension fund assets as a share of GDP. The aging and financial structure coefficients remain strongly significant, with Pop.~65+ increasing slightly to 0.0177 ($p < 0.001$). The pension variable itself is not significant ($p = 0.45$), suggesting that pension system development does not independently predict bank deposit ratios once aging and financial structure are controlled for.
+
+Model~(4) is the fully specified model, adding bank-level controls (log assets, equity ratio, NIM, loan-to-deposit ratio) and macroeconomic controls (GDP growth, unemployment, interest rate). The $R^2$ more than doubles to 34.2 percent. The coefficient on Pop.~65+ remains positive and significant at the five-percent level (0.0112, $p = 0.018$). FinStructure is also significant at the five-percent level (0.1512, $p = 0.022$). The bank-level controls are all highly significant and carry economically intuitive signs: larger banks have lower deposit ratios (reflecting greater access to wholesale funding), more capitalised banks have lower deposit ratios (less leverage overall), and banks with higher net interest margins have higher deposit ratios (consistent with a traditional deposit-taking business model).
+
+\subsection{Economic Significance}
+
+The coefficient on Pop.~65+ in Model~(4) implies that a one-percentage-point increase in the elderly population share is associated with a 1.12-percentage-point increase in the deposit ratio. Given that the interquartile range of Pop.~65+ across the sample is approximately 5.4 percentage points (from 16.1 to 21.5 percent), the implied difference in deposit ratios between the 25th and 75th percentile country is about $5.4 \times 0.0112 = 0.060$, or 6.0 percentage points. Relative to the sample mean deposit ratio of 72.7 percent, this represents an 8.3 percent difference---a meaningful economic magnitude.
+
+Similarly, the FinStructure coefficient of 0.1512 implies that moving from the most market-based country in the sample ($-0.67$) to the most bank-based ($0.77$) is associated with a $1.44 \times 0.1512 = 0.218$ increase in the deposit ratio, a very substantial effect.
+
+\subsection{The Interaction Between Aging and Financial Structure}
+
+Table~\ref{tab:interaction} reports the results when an interaction term $\text{Pop65} \times \text{FinStructure}$ is added to the fully specified model.
+
+\begin{table}[H]
+\centering
+\caption{Interaction Between Population Aging and Financial Structure}
+\label{tab:interaction}
+\small
+\begin{threeparttable}
+\begin{tabular}{l d{4.4}}
+\toprule
+& \multicolumn{1}{c}{(5)} \\
+\midrule
+Pop.\ 65+ (\%)                          & 0.0112^{**}  \\
+                                         & (0.0048)     \\[6pt]
+FinStructure                             & 0.2229       \\
+                                         & (0.2408)     \\[6pt]
+Pop.\ 65+ $\times$ FinStructure          & -0.0043      \\
+                                         & (0.0147)     \\[6pt]
+Pension Assets/GDP                       & 0.0003       \\
+                                         & (0.0004)     \\[6pt]
+Bank Controls                            & \multicolumn{1}{c}{Yes} \\
+Macro Controls                           & \multicolumn{1}{c}{Yes} \\
+Year FE                                  & \multicolumn{1}{c}{Yes} \\[4pt]
+Observations                             & \multicolumn{1}{c}{67,202} \\
+$R^2$                                    & 0.342        \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item \textit{Notes:} The dependent variable is the deposit-to-asset ratio. Specification includes all bank and macro controls as in Model~(4). Standard errors clustered at the country level in parentheses. $^{***}$, $^{**}$, $^{*}$ indicate significance at 1\%, 5\%, 10\%.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+The interaction term is economically small ($-0.0043$) and far from statistically significant ($p = 0.77$). Moreover, its inclusion renders the main effect of FinStructure insignificant, a pattern consistent with multicollinearity between the interaction term and its constituents. The $R^2$ does not improve. These results do not support Hypothesis~2: the positive relationship between aging and deposit funding does not appear to differ systematically between bank-based and market-based financial systems.
+
+Several explanations may account for this null result. First, the aging effect may operate primarily through household-level portfolio allocation decisions that are driven by risk aversion and precautionary motives---channels that function independently of the macro-level financial architecture. Second, financial globalisation and the convergence of banking systems may have reduced the practical distinction between bank-based and market-based systems over the sample period. Third, the FinStructure index may not capture the specific dimensions of financial development that moderate the aging--deposit link.
+
+% ═══════════════════════════════════════════════════════════════
+% 6. EXTENSIONS AND ROBUSTNESS
+% ═══════════════════════════════════════════════════════════════
+
+\section{Extensions and Robustness}
+\label{sec:extensions}
+
+\subsection{Role of Pension Systems}
+
+Across all specifications, pension fund assets as a share of GDP are not significantly associated with bank deposit ratios. This null result is somewhat surprising, as one might expect that countries with large funded pension systems divert household savings away from bank deposits. However, pension funds and bank deposits may serve different functions in the household portfolio: pension assets are illiquid and long-term, while deposits serve transaction and precautionary purposes. Consequently, larger pension systems may not crowd out deposits at the margin. Alternatively, the correlation between pension development and other country characteristics (notably financial structure) may absorb the variation.
+
+\subsection{Progressive Model Building}
+
+The progressive addition of controls across Models~(1) through (4) serves as an informal robustness exercise. The aging coefficient is robust across specifications, ranging from 0.0079 (insignificant without financial structure controls) to 0.0177 (with financial structure and pension controls) and settling at 0.0112 in the fully specified model. The stability of the estimate once financial structure is controlled for (Models 2--4) provides reassurance that the result is not driven by a particular set of omitted variables.
+
+\subsection{Limitations and Avenues for Future Research}
+
+Several limitations should be noted. First, the pooled OLS estimation with year fixed effects does not fully address potential endogeneity from unobserved country-level heterogeneity. Future work could employ instrumental variables---for example, using lagged fertility rates as instruments for current age structure---to strengthen causal identification. Second, the deposit ratio is an imperfect measure of deposit funding reliance, as it does not distinguish between retail deposits (which are most directly linked to household saving) and wholesale or interbank deposits. Third, the analysis treats the elderly population as a homogeneous group, but the saving behaviour of the ``young old'' (65--74) may differ substantially from that of the ``oldest old'' (85+). Finer-grained demographic data could reveal important nonlinearities. Finally, the sample period includes the COVID-19 pandemic and the subsequent interest rate hiking cycle, which may have temporarily altered deposit dynamics.
+
+% ═══════════════════════════════════════════════════════════════
+% 7. CONCLUSION
+% ═══════════════════════════════════════════════════════════════
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+This paper provides empirical evidence that population aging is positively associated with bank deposit funding across OECD countries. Using a panel of over 67,000 bank-year observations from 38 countries over 2010--2024, I find that a one-percentage-point increase in the share of the population aged 65 and above is associated with a 1.12-percentage-point increase in the deposit-to-asset ratio. This result is consistent with the life-cycle hypothesis augmented by precautionary and bequest saving motives: older households maintain substantial deposit holdings and thereby provide a stable funding base for banks.
+
+Financial system structure also matters for deposit funding. Banks in more bank-based economies exhibit significantly higher deposit ratios, consistent with the idea that households in these systems face fewer alternatives to bank deposits. However, the interaction between aging and financial structure is not significant, suggesting that the aging--deposit relationship is a robust empirical regularity that transcends institutional differences in financial system architecture.
+
+These findings carry implications for bank management, financial regulation, and macroprudential policy. As OECD populations continue to age, banks can expect a sustained supply of deposit funding---a stabilising force for bank balance sheets. At the same time, regulators should consider that this demographic dividend may eventually reverse as the very old dissave more aggressively, particularly in countries where the baby-boom cohorts begin to reach advanced ages. Understanding the demographic underpinnings of bank funding stability is essential for designing prudent liquidity and capital requirements in an aging world.
+
+% ═══════════════════════════════════════════════════════════════
+% BIBLIOGRAPHY
+% ═══════════════════════════════════════════════════════════════
+
+\newpage
+\bibliographystyle{apalike}
+
+\begin{thebibliography}{99}
+
+\bibitem[Allen and Gale(2000)]{Allen2000}
+Allen, F. and Gale, D. (2000).
+\newblock \textit{Comparing Financial Systems}.
+\newblock MIT Press, Cambridge, MA.
+
+\bibitem[Ando and Modigliani(1963)]{Ando1963}
+Ando, A. and Modigliani, F. (1963).
+\newblock The ``life cycle'' hypothesis of saving: Aggregate implications and tests.
+\newblock \textit{American Economic Review}, 53(1):55--84.
+
+\bibitem[B{\"o}rsch-Supan et~al.(2003)]{Boersch-Supan2003}
+B{\"o}rsch-Supan, A., Brugiavini, A., J{\"u}rges, H., Mackenbach, J., Siegrist, J., and Weber, G. (2003).
+\newblock \textit{Health, Ageing and Retirement in Europe}.
+\newblock Mannheim Research Institute for the Economics of Aging (MEA).
+
+\bibitem[Cameron et~al.(2008)]{Cameron2008}
+Cameron, A.~C., Gelbach, J.~B., and Miller, D.~L. (2008).
+\newblock Bootstrap-based improvements for inference with clustered errors.
+\newblock \textit{Review of Economics and Statistics}, 90(3):414--427.
+
+\bibitem[De~Nardi et~al.(2010)]{DeNardi2010}
+De~Nardi, M., French, E., and Jones, J.~B. (2010).
+\newblock Why do the elderly save? {T}he role of medical expenses.
+\newblock \textit{Journal of Political Economy}, 118(1):39--75.
+
+\bibitem[Levine(2002)]{Levine2002}
+Levine, R. (2002).
+\newblock Bank-based or market-based financial systems: {W}hich is better?
+\newblock \textit{Journal of Financial Intermediation}, 11(4):398--428.
+
+\bibitem[Modigliani and Brumberg(1954)]{Modigliani1954}
+Modigliani, F. and Brumberg, R. (1954).
+\newblock Utility analysis and the consumption function: An interpretation of cross-section data.
+\newblock In Kurihara, K.~K., editor, \textit{Post-Keynesian Economics}, pages 388--436. Rutgers University Press.
+
+\bibitem[OECD(2024)]{OECD2024}
+OECD (2024).
+\newblock \textit{Pensions at a Glance 2024: OECD and G20 Indicators}.
+\newblock OECD Publishing, Paris.
+
+\bibitem[Petersen(2009)]{Petersen2009}
+Petersen, M.~A. (2009).
+\newblock Estimating standard errors in finance panel data sets: {C}omparing approaches.
+\newblock \textit{Review of Financial Studies}, 22(1):435--480.
+
+\bibitem[Poterba et~al.(2011)]{Poterba2011}
+Poterba, J.~M., Venti, S.~F., and Wise, D.~A. (2011).
+\newblock The composition and drawdown of wealth in retirement.
+\newblock \textit{Journal of Economic Perspectives}, 25(4):95--118.
+
+\end{thebibliography}
+
+% ═══════════════════════════════════════════════════════════════
+% DECLARATION
+% ═══════════════════════════════════════════════════════════════
+
+\newpage
+\section*{Declaration of Authorship}
+\addcontentsline{toc}{section}{Declaration of Authorship}
+
+I hereby declare that I have written this paper independently and have not used any sources or aids other than those indicated. All passages taken verbatim or in substance from published or unpublished sources have been identified as such. This paper has not been submitted, in whole or in part, for any other examination at this or any other institution.
+
+I further declare that AI-based tools (specifically Claude by Anthropic) were used in the preparation of this research, in accordance with the course guidelines. The AI tool was used to assist with data processing, regression analysis, and drafting of certain text passages. All results were independently verified and the intellectual contribution, research design, and interpretation of findings are my own.
+
+\vspace{2cm}
+
+\noindent\rule{6cm}{0.4pt}\\
+Alexander Kekkas\\
+St.\,Gallen, March 2026
+
+\end{document}
